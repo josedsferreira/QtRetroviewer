@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/qt/qml/qtretroviewer">
         <file>main.qml</file>
+        <file>pics/placeholder.png</file>
+        <file>pics/result.png</file>
     </qresource>
 </RCC>

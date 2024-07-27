@@ -94,6 +94,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="backend.cpp" />
+    <ClCompile Include="imageProvider.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="palette.cpp" />
     <ClCompile Include="rvfunctions.cpp" />
@@ -104,6 +105,7 @@
     <QtMoc Include="backend.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="imageProvider.h" />
     <ClInclude Include="palette.h" />
     <ClInclude Include="rvfunctions.h" />
   </ItemGroup>

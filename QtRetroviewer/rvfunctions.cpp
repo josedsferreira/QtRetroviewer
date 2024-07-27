@@ -224,13 +224,24 @@ cv::Mat changeContrastAndBrightness(const cv::Mat& image, double alpha = 1.0, in
     if (beta < 0) { beta = 0; }
     else if (beta > 100) { beta = 100; }
 
-    cv::Mat new_image = cv::Mat::zeros(image.size(), image.type()); // new image with pixels set to zero
+    // Check if the image is grayscale
+    cv::Mat bgrImage;
+    if (image.channels() == 1) {
+        // Convert the grayscale image to a 3-channel BGR image
+        cv::cvtColor(image, bgrImage, cv::COLOR_GRAY2BGR);
+    }
+    else {
+        // If the image is already in color, just use the original image
+        bgrImage = image; // Clone to avoid modifying the original image
+    }
 
-    for (int y = 0; y < image.rows; y++) {
-        for (int x = 0; x < image.cols; x++) {
-            for (int c = 0; c < image.channels(); c++) {
+    cv::Mat new_image = cv::Mat::zeros(bgrImage.size(), bgrImage.type()); // new image with pixels set to zero
+
+    for (int y = 0; y < bgrImage.rows; y++) {
+        for (int x = 0; x < bgrImage.cols; x++) {
+            for (int c = 0; c < bgrImage.channels(); c++) {
                 new_image.at<cv::Vec3b>(y, x)[c] =
-                    cv::saturate_cast<uchar>(alpha * image.at<cv::Vec3b>(y, x)[c] + beta);
+                    cv::saturate_cast<uchar>(alpha * bgrImage.at<cv::Vec3b>(y, x)[c] + beta);
             }
         }
     }

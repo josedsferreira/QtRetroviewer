@@ -41,6 +41,9 @@
     <ClCompile Include="palette.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="imageProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="backend.h">
@@ -52,6 +55,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imageProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
