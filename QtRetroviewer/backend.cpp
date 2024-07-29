@@ -3,6 +3,10 @@
 #include <iostream>
 #include <qdebug.h>
 #include <string>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 
 Backend::Backend(QObject* parent) : QObject{ parent }
 {
@@ -15,7 +19,10 @@ Q_INVOKABLE void Backend::testMessage(const QString& msg)
     qDebug() << msg;
 }
 
-Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFlag, int colorQuantity, int palette, int brightness, double contrast, double pixelizationFactor, double gamma)
+Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFlag, int colorQuantity, int brightness, double contrast, double pixelizationFactor, double gamma,
+                                            const QColor& color1, const QColor& color2, const QColor& color3,
+                                            const QColor& color4, const QColor& color5, const QColor& color6,
+                                            const QColor& color7, const QColor& color8)
 {
     std::string imagePath = imagePathQs.toStdString();
     // Find the position of C to remove extra bits
@@ -31,7 +38,7 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
     qDebug() << "imagePath: " << imagePath;
     qDebug() << "Bayer Flag: " << bayerFlag;
     qDebug() << "color quantity: " << colorQuantity;
-    qDebug() << "Palette choice: " << palette;
+    //qDebug() << "Palette choice: " << palette;
     qDebug() << "brightness: " << brightness;
     qDebug() << "contrast: " << contrast;
     qDebug() << "Pixelization: " << pixelizationFactor;
@@ -51,6 +58,7 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
         image = bayerDither(image, 2);
     }
 
+    /*
     if (colorQuantity != 0) {
         // Quantization
         image = quantize(image, colorQuantity);
@@ -69,6 +77,12 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
             image = set2ColorPalette(image, palette);
             break;
         }
+    }
+    */
+    if (colorQuantity != 0) {
+        // Quantization
+        image = quantize(image, colorQuantity);
+        image = editPalette(image, colorQuantity, color1, color2, color3, color4, color5, color6, color7, color8);
     }
     
     if (brightness != 0 || contrast != 1) {
@@ -102,11 +116,30 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
     
 }
 
-Q_INVOKABLE void Backend::saveImage(std::string savePath)
+Q_INVOKABLE void Backend::saveImage(const QString& savePathQs)
 {
     qDebug() << "Save image function called";
-
+    std::string savePath = savePathQs.toStdString();
+    // Find the position of C to remove extra bits
+    size_t pos = savePath.find_first_of("C");
+    if (pos != std::string::npos) {
+        // Extract the path
+        savePath = savePath.substr(pos);
+        savePath = savePath + ".png";
+    }
     qDebug() << "Path to save: " << savePath;
+
+    fs::path source = "pics/result.png";
+    fs::path destination = savePath;
+
+    try {
+        fs::copy(source, destination, fs::copy_options::overwrite_existing);
+        qDebug() << "File copied successfully.";
+        emit imageSaved();
+    }
+    catch (const fs::filesystem_error& e) {
+        qDebug() << "Error copying file: " << e.what() << '\n';
+    }
 
     emit imageSaved();
 }

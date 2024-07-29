@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <QString>
+#include <QColor>
 
 #include <QObject>
 //#include <QtQml>
@@ -18,10 +19,13 @@ public:
     Q_INVOKABLE void testMessage(const QString& msg);
 
     Q_INVOKABLE void generateImage(const QString& imagePathQs, bool bayerFlag,
-                                    int colorQuantity, int palette, int brightness,
-                                    double contrast, double pixelizationFactor, double gamma);
+                                    int colorQuantity, int brightness,
+                                    double contrast, double pixelizationFactor, double gamma,
+                                    const QColor& color1, const QColor& color2, const QColor& color3,
+                                    const QColor& color4, const QColor& color5, const QColor& color6,
+                                    const QColor& color7, const QColor& color8);
 
-    Q_INVOKABLE void saveImage(std::string savePath);
+    Q_INVOKABLE void saveImage(const QString& savePathQs);
 
 signals:
     void imageGenerated();

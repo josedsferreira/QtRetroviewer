@@ -85,29 +85,46 @@ cv::Mat quantize(const cv::Mat& image, int quantity = 4) {
     return quantizedImage;
 }
 
-cv::Mat pixelate(const cv::Mat& image, double factor = 1) {
+cv::Mat pixelate(const cv::Mat& image, double factor = 1.0) {
+    // Ensure factor is within the valid range
+    if (factor < 0.01) {
+        factor = 0.01;
+    }
+    else if (factor > 1) {
+        factor = 1.0;
+    }
 
-    //std::cout << "Pixelization Factor: " << factor << std::endl;
+    // Define a base block size for the pixelation effect
+    const int baseBlockSize = 10;
+
+    // Calculate the actual block size based on the factor
+    int blockSize = static_cast<int>(baseBlockSize / factor);
+
+    // Ensure blockSize is at least 1 to avoid division by zero or overly large values
+    if (blockSize < 1) {
+        blockSize = 1;
+    }
+
+    // Calculate new dimensions for downsampling
+    cv::Size newSize(image.cols / blockSize, image.rows / blockSize);
 
     // Downsample the image
-    cv::Size newSize(static_cast<int>(image.cols * factor), static_cast<int>(image.rows * factor)); // resolution for downsampling
-
     cv::Mat resizedImage;
-
     cv::resize(image, resizedImage, newSize, 0, 0, cv::INTER_AREA);
 
-    // Upsample the image back to original size
+    // Upsample the image back to the original size
     cv::Mat pixelatedImage;
-
     cv::resize(resizedImage, pixelatedImage, image.size(), 0, 0, cv::INTER_NEAREST);
 
     return pixelatedImage;
 }
 
+
 cv::Mat set2ColorPalette(const cv::Mat& image, int choice) {
 
     //std::cout << "Choice: " << choice << std::endl;
     if (choice >= getOneBitPaletteSize()) { choice = 0; }
+    else if (choice < 0) { choice = 0; }
     //std::cout << "Choice: " << choice << std::endl;
     //std::cout << "Palette size: " << getOneBitPaletteSize() << std::endl;
 
@@ -135,6 +152,7 @@ cv::Mat set2ColorPalette(const cv::Mat& image, int choice) {
 cv::Mat set4ColorPalette(const cv::Mat& image, int choice) {
 
     if (choice >= getTwoBitPaletteSize()) { choice = 0; }
+    else if (choice < 0) { choice = 0; }
 
     twoBitPalette& palette = getTwoBitPaletteByIndex(choice);
 
@@ -168,6 +186,7 @@ cv::Mat set4ColorPalette(const cv::Mat& image, int choice) {
 cv::Mat set8ColorPalette(const cv::Mat& image, int choice) {
 
     if (choice >= getFourBitPaletteSize()) { choice = 0; }
+    else if (choice < 0) { choice = 0; }
 
     fourBitPalette& palette = getFourBitPaletteByIndex(choice);
 
@@ -265,4 +284,97 @@ cv::Mat changeGamma(const cv::Mat& image, float gamma) {
 
     cv::LUT(image, table, alteredImage);
     return alteredImage;
+}
+
+cv::Mat editPalette(const cv::Mat& image, int colorQuantity, const QColor& color1, const QColor& color2, const QColor& color3, const QColor& color4, const QColor& color5, const QColor& color6, const QColor& color7, const QColor& color8)
+{
+    // Create an output image of the same size but with 3 channels (color image)
+    cv::Mat colorImage(image.size(), CV_8UC3);
+
+    cv::Vec3b cvColor1 = cv::Vec3b(color1.blue(), color1.green(), color1.red());
+    cv::Vec3b cvColor2 = cv::Vec3b(color2.blue(), color2.green(), color2.red());
+    cv::Vec3b cvColor3 = cv::Vec3b(color3.blue(), color3.green(), color3.red());
+    cv::Vec3b cvColor4 = cv::Vec3b(color4.blue(), color4.green(), color4.red());
+    cv::Vec3b cvColor5 = cv::Vec3b(color5.blue(), color5.green(), color5.red());
+    cv::Vec3b cvColor6 = cv::Vec3b(color6.blue(), color6.green(), color6.red());
+    cv::Vec3b cvColor7 = cv::Vec3b(color7.blue(), color7.green(), color7.red());
+    cv::Vec3b cvColor8 = cv::Vec3b(color8.blue(), color8.green(), color8.red());
+
+
+    if (colorQuantity == 2) {
+        for (int i = 0; i < image.rows; ++i) {
+            for (int j = 0; j < image.cols; ++j) {
+                if (image.at<uchar>(i, j) == 0) {
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor1;
+                }
+                else
+                {
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor2;
+                }
+            }
+        }
+    }
+    else if(colorQuantity == 4) {
+        for (int i = 0; i < image.rows; ++i) {
+            for (int j = 0; j < image.cols; ++j) {
+
+                switch (image.at<uchar>(i, j))
+                {
+                case 0:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor1;
+                    break;
+                case 85:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor2;
+                    break;
+                case 170:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor3;
+                    break;
+                case 255:
+                default:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor4;
+                    break;
+                }
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < image.rows; ++i) {
+            for (int j = 0; j < image.cols; ++j) {
+
+                switch (image.at<uchar>(i, j))
+                {
+                case 0:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor1;
+                    break;
+                case 36:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor2;
+                    break;
+                case 72:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor3;
+                    break;
+                case 108:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor4;
+                    break;
+                case 144:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor5;
+                    break;
+                case 180:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor6;
+                    break;
+                case 216:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor7;
+                    break;
+                case 252:
+                case 288:
+                default:
+                    colorImage.at<cv::Vec3b>(i, j) = cvColor8;
+                    break;
+                }
+            }
+        }
+    }
+    
+
+
+    return colorImage;
 }
