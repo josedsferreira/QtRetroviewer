@@ -4,6 +4,8 @@
 #include <qdebug.h>
 #include <string>
 #include <filesystem>
+#include <QCoreApplication>
+#include <QDir>
 
 namespace fs = std::filesystem;
 
@@ -101,7 +103,10 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
     }
 
     // Save the image to a file
-    std::string outFile = "pics/result.png";
+    QString picsDir = QCoreApplication::applicationDirPath() + "/pics";
+    QDir().mkpath(picsDir); // Create the directory if it does not exist
+    std::string outFile = (picsDir + "/result.png").toStdString();
+
     if (!cv::imwrite(outFile, image)) // check for success or fail
     {
         qDebug() << "Error: Could not save the image!";
@@ -109,7 +114,7 @@ Q_INVOKABLE void Backend::generateImage(const QString& imagePathQs, bool bayerFl
     }
     else
     {
-        qDebug() << "Image saved successfully to " << outFile;
+        qDebug() << "Image saved successfully to " << QString::fromStdString(outFile);
         emit imageGenerated();
     }
 
